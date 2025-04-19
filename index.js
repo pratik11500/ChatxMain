@@ -11,7 +11,9 @@ const gamedirectory = path.join(__dirname, "html");
 
 app.use(express.static(gamedirectory));
 
-httpserver.listen(3000);
+httpserver.listen(3000, '0.0.0.0', () => {
+  console.log('Server running on port 3000');
+});
 
 var rooms = [];
 var usernames = [];
