@@ -1,5 +1,6 @@
+
 var socket;
-var usernameInput
+var usernameInput;
 var chatIDInput;
 var messageInput;
 var chatRoom;
@@ -17,32 +18,49 @@ function onload(){
 
   socket.on("join", function(room){
     chatRoom.innerHTML = "Chatroom : " + room;
-  })
+  });
 
   socket.on("recieve", function(message){
     console.log(message);
-    if (messages.length < 9){
+    if (messages.length < 10){
       messages.push(message);
-      dingSound.currentTime = 0;
-      dingSound.play();
-    }
-    else{
+    } else {
       messages.shift();
       messages.push(message);
     }
-    for (i = 0; i < messages.length; i++){
-        document.getElementById("Message"+i).innerHTML = messages[i];
-        document.getElementById("Message"+i).style.color = "#303030";
+    updateMessages();
+    if (dingSound) {
+      dingSound.currentTime = 0;
+      dingSound.play().catch(e => console.log('Audio play failed:', e));
     }
-  })
+  });
+
+  // Add enter key support for sending messages
+  messageInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      Send();
+    }
+  });
+}
+
+function updateMessages() {
+  for (let i = 0; i < 10; i++) {
+    let messageElement = document.getElementById("Message" + i);
+    if (messageElement) {
+      messageElement.innerHTML = messages[i] || '-';
+      messageElement.style.color = messages[i] ? "#303030" : "#a0a0a0";
+    }
+  }
 }
 
 function Connect(){
-  socket.emit("join", chatIDInput.value, usernameInput.value);
+  if (usernameInput.value.trim() !== "") {
+    socket.emit("join", chatIDInput.value, usernameInput.value);
+  }
 }
 
 function Send(){
-  if (delay && messageInput.value.replace(/\s/g, "") != ""){
+  if (delay && messageInput.value.trim() !== ""){
     delay = false;
     setTimeout(delayReset, 1000);
     socket.emit("send", messageInput.value);
